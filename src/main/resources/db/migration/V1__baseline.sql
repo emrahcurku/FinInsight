@@ -1,0 +1,6 @@
+-- =============================================
+-- FinInsight — Baseline Migration
+-- =============================================
+-- This migration establishes the Flyway baseline.
+-- Actual schema will be created in Phase 2.
+-- =============================================

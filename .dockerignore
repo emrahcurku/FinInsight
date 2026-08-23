@@ -1,0 +1,22 @@
+# Build & IDE files
+target/
+.idea/
+.vscode/
+*.iml
+*.swp
+*.log
+
+# Git & documentation
+.git/
+.gitignore
+*.md
+
+# Local environment & secret files
+.env
+.env.*
+!.env.example
+
+# Docker Compose volumes & local test output
+docker-data/
+test-output/
+surefire-reports/

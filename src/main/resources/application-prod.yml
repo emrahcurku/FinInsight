@@ -1,0 +1,31 @@
+# ==============================================================================
+# Production Environment Profile Configuration (application-prod.yml)
+# ==============================================================================
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+
+# Disable Swagger UI and OpenAPI documentation in production for security
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+# Production Security Defaults
+application:
+  security:
+    jwt:
+      cookie-secure: true
+      cookie-same-site: Strict
+
+# Production Logging Levels (No debug/trace logs)
+logging:
+  level:
+    root: WARN
+    com.fininsight: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: ERROR

@@ -1,0 +1,43 @@
+# Test profile — uses Testcontainers PostgreSQL by default or local test database
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:tc:postgresql:17-alpine:///fininsight}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.testcontainers.jdbc.ContainerDatabaseDriver}
+    username: ${SPRING_DATASOURCE_USERNAME:fininsight}
+    password: ${SPRING_DATASOURCE_PASSWORD:fininsight_dev}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+  cache:
+    type: simple
+  kafka:
+    enabled: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration
+      - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
+
+application:
+  outbox:
+    enabled: false
+  ai:
+    enabled: true
+    provider: mock
+  security:
+    jwt:
+      secret-key: dGhpcy1pcy1hLXNhbXBsZS1kZXZlbG9wbWVudC1qd3Qtc2VjcmV0LWtleS1taW4tNjQtY2hhcmFjdGVycy1sb25nLWZvci1obWFjLXNoYTUxMg==
+      access-token-expiration-ms: 900000
+      refresh-token-expiration-ms: 604800000
+      cookie-name: refresh_token
+      cookie-secure: false
+      cookie-same-site: Strict
+
+logging:
+  level:
+    root: WARN
+    com.fininsight: INFO

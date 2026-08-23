@@ -1,0 +1,135 @@
+server:
+  port: ${APP_PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: fininsight
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+  # --- Database ---
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:fininsight}
+    username: ${POSTGRES_USER:fininsight}
+    password: ${POSTGRES_PASSWORD:fininsight_dev}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+
+  # --- JPA / Hibernate ---
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+
+  # --- Flyway ---
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # --- Redis & Caching ---
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 2000ms
+
+  # --- Kafka ---
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:fininsight-consumer-group}
+      auto-offset-reset: earliest
+      concurrency: ${KAFKA_CONSUMER_CONCURRENCY:1}
+
+# --- Application Configuration ---
+application:
+  outbox:
+    enabled: ${OUTBOX_ENABLED:true}
+    polling-interval-ms: ${OUTBOX_POLLING_INTERVAL_MS:1000}
+    batch-size: ${OUTBOX_BATCH_SIZE:50}
+    cleanup-cron: ${OUTBOX_CLEANUP_CRON:0 0 3 * * *}
+    processed-cleanup-cron: ${PROCESSED_CLEANUP_CRON:0 0 3 * * *}
+  kafka:
+    retry:
+      max-attempts: ${KAFKA_RETRY_ATTEMPTS:3}
+      backoff-ms: ${KAFKA_RETRY_BACKOFF_MS:1000}
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:}
+      access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:900000} # 15 minutes
+      refresh-token-expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION_MS:604800000} # 7 days
+      cookie-name: ${JWT_COOKIE_NAME:refresh_token}
+      cookie-secure: ${JWT_COOKIE_SECURE:false}
+      cookie-same-site: ${JWT_COOKIE_SAME_SITE:Strict}
+  cache:
+    redis:
+      default-ttl-seconds: ${CACHE_DEFAULT_TTL_SECONDS:300}
+      dashboard-ttl-seconds: ${CACHE_DASHBOARD_TTL_SECONDS:300}
+      analytics-ttl-seconds: ${CACHE_ANALYTICS_TTL_SECONDS:600}
+      categories-ttl-seconds: ${CACHE_CATEGORIES_TTL_SECONDS:1800}
+      ai-insights-ttl-seconds: ${CACHE_AI_INSIGHTS_TTL_SECONDS:600}
+  ai:
+    enabled: ${AI_ENABLED:true}
+    provider: ${AI_PROVIDER:openai}
+    api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:gpt-4o-mini}
+    base-url: ${AI_BASE_URL:https://api.openai.com/v1}
+    timeout-ms: ${AI_TIMEOUT_MS:5000}
+    max-retries: ${AI_MAX_RETRIES:2}
+    rate-limit-per-minute: ${AI_RATE_LIMIT_PER_MINUTE:10}
+
+# --- OpenAPI ---
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+# --- Actuator & Health Checks ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  info:
+    env:
+      enabled: false
+
+# --- Logging ---
+logging:
+  pattern:
+    level: "%5p [traceId=%X{correlationId:-}]"
+  level:
+    root: INFO
+    com.fininsight: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
